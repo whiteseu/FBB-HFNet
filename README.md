@@ -1,16 +1,13 @@
-# FBB-HFNet — core code
+# FBB-HFNet
 
-Reference code for *FBB-HFNet: Foreground-Background-Boundary Aware Hierarchical
-Fusion Network for Polyp Segmentation*.
+Project code for FBB-HFNet, a foreground-background-boundary aware hierarchical
+fusion network for polyp segmentation.
 
-| file | module | paper |
-|---|---|---|
-| `gcaeb.py` | GCAEB, grouped channel attention enhancement block | Sec. 3.2, Eq. (5)–(11) |
-| `fbbab.py` | FBBAB, foreground-background-boundary attention block | Sec. 3.3, Eq. (12)–(16) |
-| `fab.py` | FAB, feature aggregation block | Sec. 3.4, Eq. (17)–(18) |
-
-The `# Eq. (N)` comments in the source map each line back to the numbered
-equation in the paper.
+| file | module |
+|---|---|
+| `gcaeb.py` | GCAEB, grouped channel attention enhancement block |
+| `fbbab.py` | FBBAB, foreground-background-boundary attention block |
+| `fab.py` | FAB, feature aggregation block |
 
 ## GCAEB
 
