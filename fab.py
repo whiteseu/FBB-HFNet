@@ -17,8 +17,8 @@ class FAB(nn.Module):
     def forward(self, f4, f3, f2):
         size = f2.shape[-2:]
         f_cat = torch.cat([resample(f4, size), resample(f3, size), f2],
-                          dim=1)                                     # Eq. (17)
+                          dim=1)
         f_tilde = self.group_conv(self.conv(f_cat))
         gap = F.adaptive_avg_pool2d(f_tilde, 1)
-        m = torch.sigmoid(resample(gap, f_tilde.shape[-2:]))         # Eq. (18)
+        m = torch.sigmoid(resample(gap, f_tilde.shape[-2:]))
         return f_tilde * m + f_tilde

@@ -3,11 +3,12 @@
 Project code for FBB-HFNet, a foreground-background-boundary aware hierarchical
 fusion network for polyp segmentation.
 
-| file | module |
+| file | contents |
 |---|---|
 | `gcaeb.py` | GCAEB, grouped channel attention enhancement block |
 | `fbbab.py` | FBBAB, foreground-background-boundary attention block |
 | `fab.py` | FAB, feature aggregation block |
+| `metrics.py` | evaluation metrics |
 
 ## GCAEB
 
@@ -51,6 +52,14 @@ convolution, then rescales the result channel-wise with a gate produced by
 global average pooling, giving the initial decoded feature.
 
 This aggregates multi-level context without pixel-wise global self-attention.
+
+## Metrics
+
+`metrics.py` holds the evaluation measures used to score predictions against the
+ground-truth masks: the structure measure S, the weighted F-measure, and the
+enhanced-alignment measure E, together with the precision/recall/Dice/IoU family
+at a given threshold. Each takes a prediction and a ground-truth mask as float
+arrays in [0, 1] and returns a scalar.
 
 ## Weights
 

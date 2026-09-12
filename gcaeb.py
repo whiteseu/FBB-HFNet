@@ -27,12 +27,12 @@ class SubSpaceAttentionBlock(nn.Module):
 
     def forward(self, z):
         z_a, z_b = torch.split(z, [self.split_a, self.split_b], dim=1)
-        z_a = self.relu(self.conv_a(z_a))                            # Eq. (8)
-        p = torch.cat([z_b, z_a], dim=1)                             # Eq. (9)
+        z_a = self.relu(self.conv_a(z_a))
+        p = torch.cat([z_b, z_a], dim=1)
         q = torch.cat([z_a, z_b], dim=1)
-        p = self.ca_p(p) * p                                         # Eq. (10)
+        p = self.ca_p(p) * p
         q = self.ca_q(q) * q
-        return self.fuse(torch.cat([p, q], dim=1))                   # Eq. (11)
+        return self.fuse(torch.cat([p, q], dim=1))
 
 
 class GCAEB(nn.Module):
@@ -48,6 +48,6 @@ class GCAEB(nn.Module):
         self.relu = nn.ReLU(inplace=True)
 
     def forward(self, x):
-        branches = [self.branch0(x)] + [blk(x) for blk in self.blocks]  # Eq. (5)
-        b_cat = self.conv_cat(torch.cat(branches, dim=1))               # Eq. (6)
-        return self.relu(b_cat + self.conv_res(x))                      # Eq. (7)
+        branches = [self.branch0(x)] + [blk(x) for blk in self.blocks]
+        b_cat = self.conv_cat(torch.cat(branches, dim=1))
+        return self.relu(b_cat + self.conv_res(x))
