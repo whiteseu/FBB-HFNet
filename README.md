@@ -9,6 +9,11 @@ fusion network for polyp segmentation.
 | `fbbab.py` | FBBAB, foreground-background-boundary attention block |
 | `fab.py` | FAB, feature aggregation block |
 | `metrics.py` | evaluation metrics |
+| `run/Train.py` | training loop |
+| `run/Test.py` | batch prediction over the test sets |
+| `run/Inference.py` | prediction on a single image or a folder |
+| `utils/dataloader.py` | dataset classes |
+| `utils/custom_transforms.py` | the augmentation pipeline |
 
 ## GCAEB
 
@@ -60,6 +65,19 @@ ground-truth masks: the structure measure S, the weighted F-measure, and the
 enhanced-alignment measure E, together with the precision/recall/Dice/IoU family
 at a given threshold. Each takes a prediction and a ground-truth mask as float
 arrays in [0, 1] and returns a scalar.
+
+## Training and inference
+
+The scripts under `run/` are driven by a YAML config passed with `--config`, which
+supplies the dataset roots, the transform list, the optimizer and scheduler
+settings and the checkpoint directory.
+
+`utils/custom_transforms.py` holds the augmentation pipeline: resizing to
+352 x 352, random scaling in [0.75, 1.25], random horizontal and vertical
+flipping, random rotation in [0, 359] degrees, random photometric distortion over
+contrast, sharpness and brightness, and random morphological dilation and
+erosion. At test time only resizing and normalization are applied, and
+predictions are bilinearly upsampled back to the original resolution.
 
 ## Weights
 
