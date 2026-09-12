@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+*.so
+.ipynb_checkpoints/
+.venv/
+venv/
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# 权重放 Release，不入库
+*.pth
+*.pt
+*.ckpt
+*.safetensors
