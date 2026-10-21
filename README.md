@@ -1,0 +1,94 @@
+# FBB-HFNet
+
+Project code for FBB-HFNet, a foreground-background-boundary aware hierarchical
+fusion network for polyp segmentation.
+
+| file | contents |
+|---|---|
+| `gcaeb.py` | GCAEB, grouped channel attention enhancement block |
+| `fbbab.py` | FBBAB, foreground-background-boundary attention block |
+| `fab.py` | FAB, feature aggregation block |
+| `metrics.py` | evaluation metrics |
+| `run/Train.py` | training loop |
+| `run/Test.py` | batch prediction over the test sets |
+| `run/Inference.py` | prediction on a single image or a folder |
+| `utils/dataloader.py` | dataset classes |
+| `utils/custom_transforms.py` | the augmentation pipeline |
+
+## GCAEB
+
+Sits on the encoder side and enhances the stage-2, stage-3 and stage-4 features
+of the Res2Net-50 backbone, unifying them to C = 256 channels.
+
+It combines one direct branch with three parallel dual-branch sub-space
+attention blocks. Each sub-space block splits its input in half along the
+channel dimension, passes one half through a 1x1 convolution and ReLU, then
+cross-concatenates the two halves into the two combinations P and Q, each
+calibrated by its own channel attention before being merged. The four branch
+outputs are concatenated, fused by a 3x3 convolution, and added to a residual
+shortcut.
+
+This lets the two channel subspaces inform each other before either is
+calibrated, rather than re-weighting all channels uniformly.
+
+## FBBAB
+
+Sits on the decoder side and is applied once at each of levels 4, 3 and 2,
+refining the prediction bottom-up.
+
+It first decomposes the previous-stage prediction into three confidence maps for
+foreground, background and boundary confusion; the three are non-negative and
+sum to one at every pixel. The estimator takes a confidence-weighted average to
+obtain one prototype vector per region. Cross-attention then uses the feature map
+as queries and the three regional prototypes as keys and values, aggregating
+context back to every pixel, which is concatenated with the original feature and
+fused.
+
+This treats the high-uncertainty region near the contour as an independent
+semantic region instead of only separating foreground from background.
+
+## FAB
+
+Sits between the encoder and the decoder and starts the decoding path.
+
+It aligns the three GCAEB outputs to H/8 resolution and concatenates them,
+compresses and fuses them with a 3x3 convolution followed by a grouped
+convolution, then rescales the result channel-wise with a gate produced by
+global average pooling, giving the initial decoded feature.
+
+This aggregates multi-level context without pixel-wise global self-attention.
+
+## Metrics
+
+`metrics.py` holds the evaluation measures used to score predictions against the
+ground-truth masks: the structure measure S, the weighted F-measure, and the
+enhanced-alignment measure E, together with the precision/recall/Dice/IoU family
+at a given threshold. Each takes a prediction and a ground-truth mask as float
+arrays in [0, 1] and returns a scalar.
+
+## Training and inference
+
+The scripts under `run/` are driven by a YAML config passed with `--config`, which
+supplies the dataset roots, the transform list, the optimizer and scheduler
+settings and the checkpoint directory.
+
+Training additionally requires `Validation.Dataset.type`,
+`Validation.Dataset.root`, and `Validation.Dataset.transform_list`. Use a
+separate validation split with deterministic preprocessing (resize, conversion,
+normalization and tensor conversion; no random augmentation). Do not use the
+held-out test sets to drive the learning-rate schedule. After each epoch, the
+final sigmoid prediction is evaluated using pixel-mean validation MSE. The
+learning rate is multiplied by 0.1 after 20 consecutive non-improving epochs;
+all trainable parameters use the same configured initial learning rate
+(1e-3).
+
+`utils/custom_transforms.py` holds the augmentation pipeline: resizing to
+352 x 352, random scaling in [0.75, 1.25], random horizontal and vertical
+flipping, random rotation in [0, 359] degrees, random photometric distortion over
+contrast, sharpness and brightness, and random morphological dilation and
+erosion. At test time only resizing and normalization are applied, and
+predictions are bilinearly upsampled back to the original resolution.
+
+## License
+
+MIT
